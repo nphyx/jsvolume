@@ -23,7 +23,9 @@ Usage Notes
 Vector Compatibility
 --------------------
 JSVolume is compatible with 3-dimensional vectors and coordinates that behave like arrays of
-[x,y,z], but floating point vectors will be coerced to integer vectors.
+[x,y,z], but floating point vectors will be coerced to integer vectors. (note: this is
+not currently 100% true, but it will be soon so treat it that way).
+
 
 Internal Array Types
 --------------------
@@ -36,8 +38,8 @@ Internal Coordinate Types
 JSVolume coordinates are represented internally as Int32s, so the maximum size of a JSVolume is 
 -2,147,483,647 to +2,147,483,647 inclusive on each axis. Be careful about memory usage when using
 non-mutating methods. For example, a full-sized JSVolume of type Int32Array is 2^34 bits and change,
-or a little over 2GB, meaning performing a JSVolume.map requires over 4GB of memory (note: this is
-not currently 100% true, but it will be soon so treat it that way).
+or a little over 2GB, meaning performing a JSVolume.map on a volume that size requires over 4GB of 
+memory. Same goes for any other non-mutating methods that return a copy of the volume.
 
 Best Practices
 --------------
