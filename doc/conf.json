@@ -1,0 +1,28 @@
+{
+	"tags":{
+		"allowUnknownTags":true
+	},
+	"source":{
+		"include": ["src"],
+		"includePattern": ".+\\.js(doc)?$",
+		"excludePattern": "(^|\\/:\\\\)_"
+	},
+	"plugins":[],
+	"templates":{
+		"cleverLinks":false,
+		"monospaceLinks":false,
+		"dateFormat"            : "ddd MMM Do YYYY",
+		"outputSourceFiles"     : false,
+		"outputSourcePath"      : false,
+		"systemName"            : "JSVolume",
+		"footer"                : "",
+		"copyright"             : "&copy; 2015 Justen Robertson. Released under MIT license.",
+		"navType"               : "vertical",
+		"theme"                 : "amelia",
+		"linenums"              : true,
+		"collapseSymbols"       : false,
+		"inverseNav"            : true,
+		"highlightTutorialCode" : true,
+		"protocol": "fred://"
+	}
+}
