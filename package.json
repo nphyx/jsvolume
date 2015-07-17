@@ -1,0 +1,48 @@
+{
+	"name":"@nphyx/jsvolume",
+	"version":"0.0.1",
+  "private": false,
+	"description":"Fast 2d and 3d coordinate-aligned grids supporting array-like operations (map, reduce, slice, and other fun stuff).",
+	"author":"Justen Robertson <nphyxx@gmail.com>",
+	"main":"",
+	"scripts": {
+		"doc":"jsdoc -c doc/conf.json -d doc"
+	},
+  "dependencies": {
+	},
+	"devDependencies": {
+		"mocha":"*",
+		"should":"*",
+		"chai":"*",
+		"sinon":"*",
+		"jsdoc":"*",
+		"jshint":"*"
+	},
+	"jshintConfig": {
+		"curly":false,
+		"latedef":true,
+		"newcap":true,
+		"quotmark":"double",
+		"undef":true,
+		"unused":true,
+		"globalstrict":true,
+		"asi":true,
+		"esnext":true,
+		"browser":true,
+		"devel":true,
+		"node":true,
+		"worker":true,
+		"globals":{
+			"mocha":false,
+			"chai":false,
+			"describe":false,
+			"define":false,
+			"it":false,
+			"before":false,
+			"beforeEach":false,
+			"after":false,
+			"afterEach":false
+		}
+	},
+	"license":"MIT"
+}
