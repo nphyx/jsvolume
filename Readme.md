@@ -10,12 +10,15 @@ natively, but for now you can do that (and filters, and other neat things) using
 I'd also like it to natively support efficient conversion to and from a Sparse Voxel Octree, but that 
 requires an SVO object which I haven't finished yet.
 
-JSVolume assumes the presence of typed arrays, so use a polyfill if you need to.
 
 JSVolumes provide convenient accessors that internally handle lookups on the array based on 
 absolute (global) or relative (internal) coordinates. A volume's basic methods operate in 
 absolute coordinate. The offsets are applied internally. It also exposes relative versions of 
 the methods to work with the relative values used internally, which are always relative to [0,0,0].
+
+Dependencies
+============
+*Typed Arrays*: JSVolume assumes the presence of typed arrays, so use a polyfill if you need to.
 
 Examples
 ========
@@ -31,6 +34,15 @@ volume.width; // 10
 volume.height; // 10
 volume.depth; // 10
 ```
+
+Create a 2-dimensional horizontal grid:
+```javascript
+var volume = new JSVolume({dimensions:[10,1,10]});
+volume.width; // 10
+volume.height; // 1
+volume.depth; // 10
+```
+Later on there will be more convenient ways to work in 2d space.
 
 If your volume is a cube, you can use a shortcut:
 ```javascript
@@ -187,6 +199,12 @@ var volume = new JSVolume({dimensions:[3,3,3], offsets:[3,3,3]});
 volume.getElementCoordsRelative(26); // [2,2,2]
 ```
 
+### JSVolume#canContain
+
+### JSVolume#isContainedBy
+
+### JSVolume.getExtents
+
 Mutating Methods 
 ----------------
 Change the contents of your volume.
@@ -211,6 +229,19 @@ Fill returns the JSVolume, so you can chain it:
 var volume = new JSVolume({dimensions:[3,3,3]});
 volume.fill(2).getElement([2,2,2]); // 2
 ```
+
+### JSVolume#each
+Each isn't inherently mutating, but a typical use would make it so.
+
+Fill a volume with random numbers:
+```javascript
+var volume = new JSVolume({dimensions:[3,3,3]});
+volume.each(function(index) {
+	this.elements[index] = Math.round(Math.rand()*10);
+});
+volume.getElement([0,0,0]); // a randomish number between 0 and 10
+```
+The callback is applied to the volume (so the context of 'this' is the volume), and passes the current index as the only argument to the callback.
 
 Pure Methods
 ------------
@@ -237,12 +268,18 @@ var slice;
 var volume = new JSVolume({dimensions:[3,3,3], offsets:[3,3,3]}).fill(3);
 var mappedVolume = volume.map(function(value, index, arr) {
 	var coords = arr.getElementCoords(index);
-	return "x:"+coords[0]+",y:"+coords[1]+",z:"+coords[2];		
+	return "x:"+coords[0]+",y:"+coords[1]+",z:"+coords[2];
 });
 mappedVolume.getElement([3,4,5]); // "x:3,y:4,z:5"
 ```
 
 (more to come)
+
+### JSVolume#reduce
+
+### JSVolume#merge / JSVolume#or
+
+### JSVolume#intersect / JSVolume#and
 
 Usage Notes
 ===========
@@ -270,7 +307,7 @@ memory. Same goes for any other non-mutating methods that return a copy of the v
 
 Best Practices
 --------------
-### Don't Use Scalar Values in Large Volumes
+### Don't Use Non-Scalar Values in Large Volumes
 Treat the elements of JSVolume as an index corresponding to an array of
 values in a typical use-case where elements correspond to a small number of different values, and to 
 use the smallest type you can. For example if your JSVolume stores locations of voxels, 
@@ -284,10 +321,6 @@ volumes that extend beyond the range of an Int32 coordinate system you can do th
 sub-volumes until you need them using this technique! Conversely, you probably don't want to make a directly hierarchical 
 JSVolume. Repeat this mantra: the elements of my JSVolume are indexes for an array of values, not the 
 values themselves.
-
-### Be Lazy (But Not Too Lazy)
-Last but not least, most of JSVolume's methods as well as its constructor support lazy coding
-with sane defaults and type coercion so you have plenty of rope to hang yourself with.
 
 Contributing
 ============
