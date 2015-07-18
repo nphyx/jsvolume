@@ -83,7 +83,8 @@ JSVolume.prototype.types = {
 	INT16ARRAY:Int16Array,
 	INT32ARRAY:Int32Array,
 	UINT8ARRAY:Uint8Array,
-	UINT8CLAMPEDARRAY:Uint8ClampedArray, UINT16ARRAY:Uint16Array,
+	UINT8CLAMPEDARRAY:Uint8ClampedArray, 
+	UINT16ARRAY:Uint16Array,
 	UINT32ARRAY:Uint32Array,
 	FLOAT32ARRAY:Float32Array,
 	FLOAT64ARRAY:Float64Array
@@ -444,4 +445,5 @@ JSVolume.prototype.intersect = function intersect() {
  */
 JSVolume.prototype.and = JSVolume.prototype.intersect;
 
-module.exports = JSVolume;
+// Support Nodejs modules
+if(typeof(module) !== "undefined") module.exports = JSVolume;
