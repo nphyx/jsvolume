@@ -141,16 +141,6 @@ var coord = new Vec3([13,5,5]);
 volume.getElement(coord); // 3
 ```
 
-### JSVolume#setElement
-Set the value of an element at a coordinate, accounting for offsets:
-```javascript
-var volume = new JSVolume({dimensions:[3,3,3], offsets:[12,3,2]}).fill(3);
-var coord = new Vec3([13,5,5]);
-volume.getElement(coord); // 3
-volume.setElement(coord, 7);
-volume.getElement(coord); // 7
-```
-
 ### JSVolume#getElementIndex
 Find the index of an element at a given coordinate:
 ```javascript
@@ -194,10 +184,37 @@ volume.getElementCoordsRelative(26); // [2,2,2]
 ```
 
 ### JSVolume#canContain
+Find out whether your volume can fully contain another volume:
+```javascript
+var volume1 = new JSVolume({dimensions:[3,3,3]});
+var volume2 = new JSVolume({dimensions:[2,2,2]});
+var volume3 = new JSVolume({dimensions:[2,2,2], offsets:[3,3,3]});
+volume1.canContain(volume2); // true
+volume2.canContain(volume1); // false
+volume3.canContain(volume1); // false
+volume1.canContain(volume3); // false
+```
 
 ### JSVolume#isContainedBy
+Find out if your volume is fully containable by another volume:
+```javascript
+var volume1 = new JSVolume({dimensions:[3,3,3]});
+var volume2 = new JSVolume({dimensions:[2,2,2]});
+var volume3 = new JSVolume({dimensions:[2,2,2], offsets:[3,3,3]});
+volume1.isContainedBy(volume2); // false 
+volume2.isContainedBy(volume1); // true
+volume3.isContainedBy(volume1); // false
+volume1.isContainedBy(volume3); // false
+```
+
 
 ### JSVolume.getExtents
+Recalculate the extents of your volume:
+```javascript
+var volume1 = new JSVolume({dimensions:[3,3,3]});
+volume1.getExtents(); // [2,2,2]
+```
+This is mainly used internally to calculate extents during construction.
 
 Mutating Methods 
 ----------------
@@ -206,9 +223,11 @@ Change the contents of your volume.
 ### JSVolume#setElement
 Set the value of an element, given its coordinates in global space:
 ```javascript
-var volume = new JSVolume({dimensions:[3,3,3], offsets:[3,3,3]}).fill(3);
-volume.setElement([3,4,5], 3);
-volume.getElement([3,4,5]); // 3
+var volume = new JSVolume({dimensions:[3,3,3], offsets:[12,3,2]}).fill(3);
+var coord = new Vec3([13,5,5]);
+volume.getElement(coord); // 3
+volume.setElement(coord, 7);
+volume.getElement(coord); // 7
 ```
 
 ### JSVolume#fill
