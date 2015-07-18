@@ -420,6 +420,34 @@ Repeat this mantra: the elements of my JSVolume are indexes for an array of valu
 ### Hierarchical Volumes
 You can use JSVolumes as indexes corresponding to arrays of other JSVolumes! So you could break your 256x256x256 volume into chunks of 16x16x16, then index those in an 8x8x8 volume, letting you perform much more memory efficient operations on subsets of your full dataset. This also means if you need truly massive volumes that extend beyond the range of an Int32 coordinate system you can do that. You can even defer initialization of sub-volumes until you need them using this technique! Conversely, you probably don't want to make a directly hierarchical JSVolume. 
 
+Development
+===========
+JSVolume is fully unit tested. It depends on Mocha, Chai, Should, and Sinon for unit testing (Sinon currently not in use since the demos are not in). It's configured to support JSHint for syntax checking, and supports JSDoc for automatic documentation.
+
+Install JSVolume:
+```
+$ git clone https://github.com/nphyx/jsvolume
+```
+
+Or from NPM (not yet published):
+```
+$ npm install @nphyx/jsvolume
+```
+
+Install dev dependencies:
+```
+$ npm install .
+```
+
+Run tests:
+```
+$ npm run test
+```
+
+Regenerate documentation:
+```
+# npm run doc
+```
 
 Contributing
 ============
