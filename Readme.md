@@ -3,7 +3,7 @@ JSVolume 0.1
 A JSVolume is a 3d of grid elements represented internally by a single-dimensional array. This provides superior performance to a multi-dimensional array, which isn't a real thing
 in javascript anyway (if you want multidimensional arrays of arbitrary dimensions, try an NDArray library).
 
-JSVolumes can do functional array-ish things like map, reduce and lice, and boolean operations like merge and intersect. Someday it might also support matrix tranformations natively, but for now you can do that (and filters, and other neat things) using JSVolume.map.  I'd also like it to natively support efficient conversion to and from a Sparse Voxel Octree, but that requires an SVO object which I haven't finished yet.
+JSVolumes can do functional array-ish things like map, reduce and slice, and boolean operations like merge and intersect. Someday it might also support matrix tranformations natively, but for now you can do that (and filters, and other neat things) using JSVolume.map.  I'd also like it to natively support efficient conversion to and from a Sparse Voxel Octree, but that requires an SVO object which I haven't finished yet.
 
 
 JSVolumes provide convenient accessors that internally handle lookups on the array based on absolute (global) or relative (internal) coordinates. A volume's basic methods operate in absolute coordinate. The offsets are applied internally. It also exposes relative versions of the methods to work with the relative values used internally, which are always relative to [0,0,0].
