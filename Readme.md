@@ -101,6 +101,7 @@ var volume = new JSVolume({dimensions:[4,5,6]});
 volume.width; // 4
 volume.height; // 5
 volume.depth; // 6
+```
 
 ### Caution
 *Don't* set the above properties directly. JSVolumes aren't clever enough to update
@@ -269,11 +270,13 @@ memory. Same goes for any other non-mutating methods that return a copy of the v
 
 Best Practices
 --------------
+### Don't Use Scalar Values in Large Volumes
 Treat the elements of JSVolume as an index corresponding to an array of
 values in a typical use-case where elements correspond to a small number of different values, and to 
 use the smallest type you can. For example if your JSVolume stores locations of voxels, 
 make an Array of voxel materials and use the JSVolume elements as indices for that array.
 
+### Hierarchical Volumes
 You can use JSVolumes as indexes corresponding to arrays of other JSVolumes! So you could break
 your 256x256x256 volume into chunks of 16x16x16, then index those in an 8x8x8 volume, letting you perform
 much more memory efficient operations on subsets of your full dataset. This also means if you need truly massive
@@ -282,6 +285,7 @@ sub-volumes until you need them using this technique! Conversely, you probably d
 JSVolume. Repeat this mantra: the elements of my JSVolume are indexes for an array of values, not the 
 values themselves.
 
+### Be Lazy (But Not Too Lazy)
 Last but not least, most of JSVolume's methods as well as its constructor support lazy coding
 with sane defaults and type coercion so you have plenty of rope to hang yourself with.
 
