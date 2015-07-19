@@ -1,4 +1,4 @@
-JSVolume 0.1
+JSVolume 0.0.2
 ============
 A JSVolume is a 3d of grid elements represented internally by a single-dimensional array. This provides superior performance to a multi-dimensional array, which isn't a real thing
 in javascript anyway (if you want multidimensional arrays of arbitrary dimensions, try an NDArray library).
