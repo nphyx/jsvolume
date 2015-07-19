@@ -95,13 +95,20 @@ var volume = new JSVolume({dimensions:[10,10,10], offsets:[5,5,5]});
 volume.extents; // [14,14,14]
 ```
 
+
 Find the outer bounds of a volume in its boundaries:
 ```javascript
 var volume = new JSVolume({dimensions:[10,10,10], offsets:[5,10,15]});
 volume.boundaries; // {west:5, east:14, bottom:10, top:19, south:15, north:24}
 ```
 
-The width, height, and depth properties are exactly what they sound like:
+Find the dimensions of the volume:
+```javascript
+var volume = new JSVolume({dimensions:[4,5,6]});
+volume.dimensions; // [4,5,6]
+```
+
+Height width and depth are available for convenience:
 ```javascript
 var volume = new JSVolume({dimensions:[4,5,6]});
 volume.width; // 4
@@ -109,16 +116,14 @@ volume.height; // 5
 volume.depth; // 6
 ```
 
-### Caution
-*Don't* set the above properties directly. JSVolumes aren't clever enough to update
-related properties when you do.
-
 Access the volume's elements directly:
 ```javascript
 var volume = new JSVolume({dimensions:[3,3,3]});
 volume.elements[26]; // the topmost, northmost, eastmost element
 ```
-It's safe to set and get elements this way, and even do some kinds of array operations, but don't do anything that will change the length or order of the array. That would corrupt the volume. In general, stick to JSVolume's methods for altering properties.
+It's safe to set and get elements this way, and even do some kinds of array operations, but don't do anything that will change the length or order of the array if you're using a generic array. That would corrupt the volume. In general, stick to JSVolume's methods for altering properties.
+
+*Note*: the current implementation relies on a hack to prevent modification of the offsets, extents, and dimensions by creating a copy of the value in the getter. Avoid accessing them within large loops for best performance.
 
 Methods
 =======
@@ -207,7 +212,6 @@ volume3.isContainedBy(volume1); // false
 volume1.isContainedBy(volume3); // false
 ```
 
-
 ### JSVolume.getExtents
 Recalculate the extents of your volume:
 ```javascript
@@ -284,7 +288,6 @@ var mappedVolume = volume.map(function(value, index, arr) {
 });
 mappedVolume.getElement([3,4,5]); // "x:3,y:4,z:5"
 ```
-
 
 ### JSVolume#reduce
 Reduce works just like Array#reduce.
