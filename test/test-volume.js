@@ -17,7 +17,7 @@ describe("JSVolume", function() {
 		volume.offsets.should.be.an.instanceOf(Int32Array);
 		volume.should.have.property("extents").with.length(3);
 		volume.extents.should.be.an.instanceOf(Int32Array);
-		volume.should.have.property("elements").with.length(0);
+		volume.should.have.property("elements").with.length(1);
 		volume.should.have.property("boundaries").with.keys(["north","south","east","west","top","bottom"]);
 	});
 
@@ -83,6 +83,18 @@ describe("JSVolume", function() {
 		volume.getElementIndexRelative([3,3,3]).should.equal(75);
 		volume.getElementIndexRelative([3,4,5]).should.equal(119);
 	});
+	it("should prevent runtime modification of fixed properties", function() {
+		(function() {volume.offsets = new Int32Array([5,6,7])}).should.throwError();
+		volume.offsets[0] = 100;
+		volume.offsets[0].should.equal(1);
+		(function() {volume.dimensions = new Int32Array([7,8,9])}).should.throwError();
+		volume.dimensions[0] = 100;
+		volume.dimensions[0].should.equal(4);
+		(function() {volume.extents = new Int32Array([7,8,9])}).should.throwError();
+		volume.extents[0] = 100;
+		volume.extents[0].should.equal(4);
+		(function() {volume.elements = new Int32Array([7,8,9])}).should.throwError();
+	});
 	it("should provide symmetrical relative element identities", function() {
 		volume.getElementCoordsRelative(0).should.eql(new Int32Array([0,0,0]));
 		var x, y, z, index;
@@ -109,7 +121,7 @@ describe("JSVolume", function() {
 	});
 	it("should not permit empty, invalid or negative dimensions", function() {
 		(function() {new JSVolume({dimensions:""})}).should.throwError();
-		(function() {new JSVolume({dimensions:undefined})}).should.throwError();
+		(function() {new JSVolume({dimensions:"this is invalid"})}).should.throwError();
 		(function() {new JSVolume({dimensions:[-1,-1,-1]})}).should.throwError();
 		(function() {new JSVolume({dimensions:[0,0,0]})}).should.throwError();
 	});
