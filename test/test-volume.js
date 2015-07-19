@@ -128,7 +128,6 @@ describe("JSVolume", function() {
 	// lets use a bigger Volume for the next few tests
 	volume2 = new JSVolume({offsets:[0,0,0], dimensions:[10,10,10], type:JSVolume.prototype.types.ARRAY});
 	it("should correctly set and retrieve element values", function() {
-		// create a 3x3x3 volume inside with correct values
 		var x, y, z, val;
 		for(x = 0; x < 10; x++) {
 			for(y = 0; y < 10; y++) {
@@ -325,7 +324,7 @@ describe("JSVolume", function() {
 		volume7.reduce(function(prev, cur, index) {
 			index.should.equal(i);
 			i++;
-			return prev+cur;
+			return 0;
 		}, 0);
 	});
 	it("should pass itself as the fourth argument for reduce", function() {
@@ -333,8 +332,9 @@ describe("JSVolume", function() {
 
 		/* jshint unused:false */
 		volume7.reduce(function(prev, cur, index, arr) {
-			arr.should.eql(volume7);
-		});
+			if(!prev) arr.should.eql(volume7); // only do this test once
+			return 1;
+		}, 0);
 	});
 	it("should not mutate the volume during reduce", function() {
 		var volume7 = Object(volume3);

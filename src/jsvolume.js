@@ -27,7 +27,6 @@ function JSVolume(params) {
 	var _dimensions = new Uint32Array([1,1,1]);
 	var _offsets = new Int32Array([0,0,0]);
 	var _extents = new Int32Array([1,1,1]);
-	var i; // used during initialization
 
 
 	/**
@@ -90,32 +89,83 @@ function JSVolume(params) {
 	 * Prevents the elements array from being overwritten but permits individual
 	 * elements to be written to
 	 */
-	Object.defineProperty(this, "elements", {
-		value: new this.type(this.width*this.height*this.depth),
-		writable:false
+	Object.defineProperty(this, "elements", {value: new this.type(_dimensions[0]*_dimensions[1]*_dimensions[2]), writable:false});
+	Object.defineProperties(this, {
+		width:{value:_dimensions[0], writable:false},
+		height:{value:_dimensions[1], writable:false},
+		depth:{value:_dimensions[2], writable:false},
+		boundaries:{value:{
+				west:_offsets[0],
+				bottom:_offsets[1],
+				north:_offsets[2],
+				east:_extents[0],
+				top:_extents[1],
+				south:_extents[2]
+			}, writable:false
+		}
 	});
+
+	// methods below defined internally because they need to access internal props
+	// directly and it's much slower if they have to get at the cloned values. small
+	// memory hit, big performance gain
+
+	/**
+	 * Checks whether a requested coordinate is valid.
+	 */
+	this.hasCoord = function hasCoord(coord) {
+		return (
+			coord[0] >= _offsets[0] && coord[0] <= _extents[0] &&
+			coord[1] >= _offsets[1] && coord[1] <= _extents[1] &&
+			coord[2] >= _offsets[2] && coord[2] <= _extents[2]
+		);
+	}
+
+	/**
+	 * Gets a element's index by its internal coordinates.
+	 */
+	this.getElementIndexRelative = function getElementIndexRelative(coord) {
+		return coord[0] + _dimensions[0] * (coord[1] + _dimensions[1] * coord[2]);
+	}
+
+	/**
+	 * Gets the internal coordinates for the element in this.elements corresponding to the given index.
+	 */
+	this.getElementCoordsRelative = function getElementCoordsRelative(index) {
+		if(index < 0 || index > this.elements.length) return false;
+		return new Int32Array([
+			index%_dimensions[0], 
+			Math.floor(index/_dimensions[0])%_dimensions[1],
+			Math.floor(index/_dimensions[0]/_dimensions[1])%_dimensions[2]
+		]);
+	}
+
+	/**
+	 * Finds the internal index of a element given its external coordinates
+	 * @param coord {mixed} a 3-element array or array-like object of x, y, and z coordinates
+	 */
+	this.getElementIndex = function getElementIndex(coord) {
+		if(!this.hasCoord(coord)) return false;
+		return (coord[0] - _offsets[0]) + _dimensions[0] * ((coord[1] - _offsets[1]) + _dimensions[1] * (coord[2] - _offsets[2]));
+	}
+
+	/**
+	 * Gets absolute coordinates of a element by its index in the elements array.
+	 */
+	this.getElementCoords = function getElementCoords(index) {
+		if(index < 0 || index > this.elements.length) return false;
+		else return new Int32Array([
+			index%_dimensions[0] + _offsets[0], 
+			Math.floor(index/_dimensions[0])%_dimensions[1] + _offsets[1],
+			Math.floor(index/_dimensions[0]/_dimensions[1])%_dimensions[2] + _offsets[2]
+		]);
+	}
+
 	return this;
 }
 
 /**
  * Some virtual properties for convenience / backward compatibility with 0.1
  */
-Object.defineProperties(JSVolume.prototype, {
-	width:{get:function() {return this.dimensions[0]}},
-	height:{get:function() {return this.dimensions[1]}},
-	depth:{get:function() {return this.dimensions[2]}},
-	boundaries:{get:function() {
-			return {
-				west:this.offsets[0],
-				bottom:this.offsets[1],
-				north:this.offsets[2],
-				east:this.extents[0],
-				top:this.extents[1],
-				south:this.extents[2]
-			}
-		}
-	}
-});
 
 JSVolume.prototype.types = {
 	ARRAY:Array,
@@ -131,82 +181,21 @@ JSVolume.prototype.types = {
 }
 
 
-/**
- * These functions are used internally to find the internal coords of a element 
- * given their global coord
- */
-JSVolume.prototype.getOffsetX = function getOffsetX(x) {return x - this.offsets[0];}
-JSVolume.prototype.getOffsetY = function getOffsetY(y) {return y - this.offsets[1];}
-JSVolume.prototype.getOffsetZ = function getOffsetZ(z) {return z - this.offsets[2];}
-
-
 	/**
 	 * gets a element by its x, y, and z coordinates
 	 */
 JSVolume.prototype.getElement = function getElement(coord) {
-	if(this.hasCoord(coord)) return this.elements[this.getElementIndex(coord)];
-	else return undefined;
+	try {
+		return this.elements[this.getElementIndex(coord)];
+	}
+	catch (e) {return undefined;}
 }
 
 /**
  * Sets the element at the given coordinates
  */
 JSVolume.prototype.setElement = function(coord, value) {
-	var index = this.getElementIndex(coord);
-	this.elements[index] = value;
-	return index;
-}
-
-
-/**
- * Checks whether a requested coordinate is valid.
- */
-JSVolume.prototype.hasCoord = function hasCoord(coord) {
-	return (coord[0] >= this.boundaries.west && coord[0] <= this.boundaries.east &&
-		coord[1] >= this.boundaries.bottom && coord[1] <= this.boundaries.top &&
-		coord[2] >= this.boundaries.north && coord[2] <= this.boundaries.south 
-	);
-}
-
-/**
- * Gets a element's index by its internal coordinates.
- */
-JSVolume.prototype.getElementIndexRelative = function getElementIndexRelative(coord) {
-	return (coord[0] + this.width * (coord[1] + this.height * coord[2]));
-}
-
-/**
- * Gets the internal coordinates for the element in this.elements corresponding to the given index.
- */
-JSVolume.prototype.getElementCoordsRelative = function getElementCoordsRelative(index) {
-	if(index < 0 || index > this.elements.length) return false;
-	var coords = new Int32Array([
-		index%this.width, 
-		Math.floor(index/this.width)%this.height,
-		Math.floor(index/this.width/this.height)%this.depth
-	]);
-	return coords;
-}
-
-/**
- * Finds the internal index of a element given its external coordinates
- * @param coord {mixed} a 3-element array or array-like object of x, y, and z coordinates
- */
-JSVolume.prototype.getElementIndex = function getElementIndex(coord) {
-	if(!this.hasCoord(coord)) return false;
-	else return this.getElementIndexRelative([this.getOffsetX(coord[0]), this.getOffsetY(coord[1]), this.getOffsetZ(coord[2])]);	
-}
-
-/**
- * Gets absolute coordinates of a element by its index in the elements array.
- */
-JSVolume.prototype.getElementCoords = function getElementCoords(index) {
-	var coords = this.getElementCoordsRelative(index);
-	if(coords === false) return false;
-	coords[0] += this.offsets[0]; 
-	coords[1] += this.offsets[1]; 
-	coords[2] += this.offsets[2];
-	return coords;
+	return (this.elements[this.getElementIndex(coord)] = value);
 }
 
 /**
@@ -226,9 +215,10 @@ JSVolume.prototype.slice = function slice(start, size) {
 	// this makes iteration easier and helps calculate the new offsets
 	normalStart = [Math.min(start[0], start[0]+size[0]), Math.min(start[1], start[1]+size[1]), Math.min(start[2], start[2]+size[2])];
 	normalEnd = [Math.max(start[0], start[0]+size[0]), Math.max(start[1], start[1]+size[1]), Math.max(start[2], start[2]+size[2])];
+	var offsets = this.offsets;
 
 	var params = {
-		offsets:new Int32Array([this.offsets[0]+normalStart[0],this.offsets[1]+normalStart[1],this.offsets[2]+normalStart[2]]),
+		offsets:new Int32Array([offsets[0]+normalStart[0],offsets[1]+normalStart[1],offsets[2]+normalStart[2]]),
 		dimensions:new Int32Array([normalEnd[0]-normalStart[0], normalEnd[1]-normalStart[1], normalEnd[2]-normalStart[2]])
 	}
 	var volume = new JSVolume(params);
