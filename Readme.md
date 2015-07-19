@@ -432,7 +432,7 @@ Install JSVolume:
 $ git clone https://github.com/nphyx/jsvolume
 ```
 
-Or from NPM (not yet published):
+Or from NPM:
 ```
 $ npm install @nphyx/jsvolume
 ```

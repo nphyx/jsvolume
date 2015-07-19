@@ -1,7 +1,7 @@
 {
 	"name":"@nphyx/jsvolume",
 	"version":"0.0.1",
-  "private": false,
+	"repository":"https://github.com/nphyx/jsvolume",
 	"description":"Fast 2d and 3d coordinate-aligned grids supporting array-like operations (map, reduce, slice, and other fun stuff).",
 	"author":"Justen Robertson <nphyxx@gmail.com>",
 	"main":"",
