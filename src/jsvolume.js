@@ -19,63 +19,103 @@
  * @property {array} elements elements are stored in a flattened array
  */
 function JSVolume(params) {
+	/**
+	 * use these during initialization, providing defaults here because
+	 * they're going to get set to read-only properties when we're done
+	 */
+	var _type = JSVolume.prototype.types.ARRAY;
+	var _dimensions = new Uint32Array([1,1,1]);
+	var _offsets = new Int32Array([0,0,0]);
+	var _extents = new Int32Array([1,1,1]);
+	var i; // used during initialization
 
-	this.width = 0;
-	this.height = 0;
-	this.depth = 0;
 
-
-
-	this.offsets = new Int32Array(3);
-	this.extents = new Int32Array(3);
-	this.type = this.types.ARRAY;
-
+	/**
+	 * Do some checking with the parameters to make sure they're not dangerous or silly.
+	 */
 	if(typeof params !== "undefined") {
-		this.type = (typeof params.type === "function")?params.type:Array;
-		if(typeof(params.dimensions) == "number") {
-			this.width = this.height = this.depth = params.dimensions;
+		/**
+		 * Type contains the constructor for the type of Array we use to store
+		 * our volume elements internally.
+		 */
+		_type = (typeof params.type === "function")?params.type:Array;
+		switch(typeof params.dimensions) {
+			case "undefined": // already set up defaults
+			break;
+			case "number":
+				_dimensions = new Uint32Array([params.dimensions, params.dimensions, params.dimensions]);
+			break;
+			case "object":
+				if(params.dimensions.length == 3) {
+					if(params.dimensions[0] < 1 || params.dimensions[1] < 1 || params.dimensions[2] < 1) throw new Error("refusing to create volume with empty or negative dimensions");
+					else _dimensions = new Uint32Array(params.dimensions);
+				}
+			break;
+			default:
+				throw new TypeError(params.dimensions + " is neither an integer nor vectorish");
 		}
-
-		else if(params.dimensions && params.dimensions.length == 3) {
-			if(params.dimensions[0] < 1 || params.dimensions[1] < 1 || params.dimensions[2] < 1) throw new Error("refusing to create volume with empty or negative dimensions");
-			else {
-				this.width  = params.dimensions[0];
-				this.height = params.dimensions[1];
-				this.depth  = params.dimensions[2];
-			}
+		switch(typeof params.offsets) {
+			case "undefined": // already set up defaults
+			break;
+			case "number":
+				_offsets = new Int32Array([params.offsets, params.offsets, params.offsets]);
+			break;
+			case "object":
+				if(params.offsets.length === 3) {
+					_offsets = new Int32Array(params.offsets);
+				}
+			break;
+			default:
+				throw new TypeError(params.offsets + " is neither an integer nor vectorish");
 		}
-		else throw new TypeError(params.dimensions + " is neither an integer nor a vector");
-
-		// Set the offsets up in an Int32Array
-		if(typeof params.offsets && params.offsets.length === 3) {
-			this.offsets[0] = params.offsets[0];
-			this.offsets[1] = params.offsets[1];
-			this.offsets[2] = params.offsets[2];
-		}
+		_extents = new Int32Array([
+			_offsets[0] + _dimensions[0] -1,
+			_offsets[1] + _dimensions[1] -1,
+			_offsets[2] + _dimensions[2] -1
+		]);
 	}
-	this.extents[0] = this.offsets[0] + this.width -1;
-	this.extents[1] = this.offsets[1] + this.height -1;
-	this.extents[2] = this.offsets[2] + this.depth -1;
 
-	// a different way of thinking of offsets and extents using cardinal directions
-	this.boundaries = {
-		west:this.offsets[0],
-		bottom:this.offsets[1],
-		north:this.offsets[2],
-		east:this.extents[0],
-		top:this.extents[1],
-		south:this.extents[2]
-	}
+	/**
+	 * All of these properties are read-only because changing them after initialization
+	 * would corrupt the volume. We define accessors here so they can get at the
+	 * privateish values. The only way to prevent mutation of TypedArray values that
+	 * I know of is to make a copy. - Nphyx 
+	 */
+	Object.defineProperty(this, "type", {get:function() {return _type}});
+	Object.defineProperty(this, "dimensions", {get:function() {return new Uint32Array(_dimensions)}});
+	Object.defineProperty(this, "offsets", {get:function() {return new Int32Array(_offsets)}});
+	Object.defineProperty(this, "extents", {get:function() {return new Int32Array(_extents)}});
 
-	this.elements = new this.type(this.width*this.height*this.depth);
-
+	/**
+	 * Prevents the elements array from being overwritten but permits individual
+	 * elements to be written to
+	 */
+	Object.defineProperty(this, "elements", {
+		value: new this.type(this.width*this.height*this.depth),
+		writable:false
+	});
 	return this;
 }
 
-/*
-JSVolume.prototype = new EventEmitter();
-JSVolume.prototype.constructor = JSVolume;
-*/
+/**
+ * Some virtual properties for convenience / backward compatibility with 0.1
+ */
+Object.defineProperties(JSVolume.prototype, {
+	width:{get:function() {return this.dimensions[0]}},
+	height:{get:function() {return this.dimensions[1]}},
+	depth:{get:function() {return this.dimensions[2]}},
+	boundaries:{get:function() {
+			return {
+				west:this.offsets[0],
+				bottom:this.offsets[1],
+				north:this.offsets[2],
+				east:this.extents[0],
+				top:this.extents[1],
+				south:this.extents[2]
+			}
+		}
+	}
+});
 
 JSVolume.prototype.types = {
 	ARRAY:Array,
